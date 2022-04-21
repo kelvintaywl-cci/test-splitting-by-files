@@ -11,10 +11,7 @@ jobs:
       - run:
           name: execute tests
           command: |
-            echo $(circleci tests glob "tests/**/*.py")
             TESTFILES=$(circleci tests glob "tests/**/*.py" | circleci tests split)
-            echo $TESTFILES
-
             for t in $TESTFILES; do
               python $t
             done
