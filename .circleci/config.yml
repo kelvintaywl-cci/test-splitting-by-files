@@ -1,0 +1,26 @@
+version: 2.1
+
+jobs:
+  test:
+    parallelism: 3
+    resource_class: small
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: execute tests
+          command: |
+            echo $(circleci tests glob "tests/**/*.py")
+            TESTFILES=$(circleci tests glob "tests/**/*.py" | circleci tests split)
+            echo $TESTFILES
+
+            for t in $TESTFILES; do
+              python $t
+            done
+
+workflows:
+  main:
+    jobs:
+      - test
+
