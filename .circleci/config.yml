@@ -35,10 +35,10 @@ jobs:
           name: combine results
           command: |
             cat result_*.out > result.out
-       - run:
-           name: verify
-           command: |
-             cat result.out
+      - run:
+          name: verify
+          command: |
+            cat result.out
 workflows:
   main:
     jobs:
