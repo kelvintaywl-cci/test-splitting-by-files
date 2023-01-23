@@ -13,11 +13,37 @@ jobs:
           command: |
             TESTFILES=$(circleci tests glob "tests/**/*.py" | circleci tests split)
             for t in $TESTFILES; do
-              python $t
+              # each parallel run needs to generate & persist a unique file
+              # so that the downstream fan-in job can collect all files via workspace
+              # here, we take advantage of the CIRCLE_NODE_INDEX env var.
+              # see https://circleci.com/docs/variables/#built-in-environment-variables
+              python $t > "result_${CIRCLE_NODE_INDEX}.out"
             done
-
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - result_*.out
+            
+  fan-in:
+    resource_class: small
+    docker:
+      - image: cimg/base:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: combine results
+          command: |
+            cat result_*.out > result.out
+       - run:
+           name: verify
+           command: |
+             cat result.out
 workflows:
   main:
     jobs:
       - test
+      - fan-in:
+          requires:
+            - test
 
